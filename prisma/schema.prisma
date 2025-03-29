@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -18,12 +12,125 @@ enum Provider {
   EMAIL
 }
 
+enum PersonType {
+  PHYSICAL
+  LEGAL
+}
+
+enum ContactType {
+  CLIENT
+  TRANSPORT
+  SUPPLIER
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  USER
+}
+
+model Organization {
+  id               String             @id @default(uuid())
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  Contact          Contact[]
+  OrganizationUser OrganizationUser[]
+}
+
+model OrganizationUser {
+  id             String       @id @default(uuid())
+  organizationId String
+  userId         String
+  role           Role
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  user           User         @relation(fields: [userId], references: [id])
+}
+
 model User {
-  id             String   @id @default(uuid())
-  provider       Provider
-  name           String
-  email          String   @unique
-  hashedPassword String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id               String             @id @default(uuid())
+  provider         Provider
+  providerId       String?
+  name             String
+  email            String             @unique
+  hashedPassword   String
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  OrganizationUser OrganizationUser[]
+}
+
+model Contact {
+  id                    String        @id @default(uuid())
+  name                  String
+  fantasyName           String?
+  personType            PersonType    @default(PHYSICAL)
+  documentNumber        String?
+  contactType           ContactType   @default(CLIENT)
+  rg                    String?
+  cpf                   String?
+  cnpj                  String?
+  contribuitor          String?
+  stateRegistration     String?
+  municipalRegistration String?
+  isActive              Boolean       @default(true)
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  contact               ContactInfo?  @relation(fields: [contactInfoId], references: [id])
+  contactInfoId         String?
+  address               Address?      @relation("ContactAddress", fields: [addressId], references: [id])
+  addressId             String?
+  billingAddress        Address?      @relation("ContactBillingAddress", fields: [billingAddressId], references: [id])
+  billingAddressId      String?
+  Organization          Organization? @relation(fields: [organizationId], references: [id])
+  organizationId        String?
+}
+
+model ContactInfo {
+  id          String    @id @default(uuid())
+  email       String?
+  phone       String?
+  celPhone    String?
+  observation String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  Contact     Contact[]
+}
+
+model Address {
+  id                    String    @id @default(uuid())
+  address               String
+  zipCode               String?
+  state                 String?
+  neighborhood          String?
+  addressNumber         String?
+  addressComplement     String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  ContactAddress        Contact[] @relation("ContactAddress")
+  ContactBillingAddress Contact[] @relation("ContactBillingAddress")
+}
+
+model Categories {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  Product     Product[]
+}
+
+model Product {
+  id            String      @id @default(uuid())
+  name          String
+  price         Int
+  description   String?
+  sku           String?
+  cost          Int?
+  stockQuantity Int?
+  barcode       String?
+  isActive      Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  category      Categories? @relation(fields: [categoriesId], references: [id])
+  categoriesId  String?
 }

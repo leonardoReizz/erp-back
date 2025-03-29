@@ -2,9 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
   IsNotEmpty,
+  IsOptional,
   IsString,
   MaxLength,
-  MinLength,
 } from 'class-validator';
 
 export class LoginDTO {
@@ -21,11 +21,26 @@ export class LoginDTO {
     description: 'The password of the user',
     example: 'password',
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  @MinLength(8)
   @MaxLength(32)
   password: string;
+
+  @ApiProperty({
+    description: 'The provider of the user',
+    example: 'GOOGLE',
+  })
+  @IsNotEmpty()
+  @IsString()
+  provider: 'GOOGLE' | 'EMAIL';
+
+  @ApiProperty({
+    description: 'The token of the user',
+    example: '1234567890',
+  })
+  @IsOptional()
+  @IsString()
+  providerId: string;
 }
 
 export class RegisterDTO {
@@ -47,6 +62,14 @@ export class RegisterDTO {
   provider: 'GOOGLE' | 'EMAIL';
 
   @ApiProperty({
+    description: 'The provider id of the user',
+    example: '1234567890',
+  })
+  @IsOptional()
+  @IsString()
+  providerId: string;
+
+  @ApiProperty({
     description: 'The email of the user',
     example: 'test@test.com',
   })
@@ -58,9 +81,8 @@ export class RegisterDTO {
     description: 'The password of the user',
     example: 'password',
   })
-  @IsNotEmpty()
   @IsString()
-  @MinLength(8)
+  @IsOptional()
   @MaxLength(32)
   password: string;
 }
